@@ -1,46 +1,47 @@
 ﻿using OSDBnet;
 using GetSubtitle.Adapters.Interfaces;
-using GetSubtitle.Adapters.POCO;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace GetSubtitle.Adapters
 {
     public class OpenSubtitlesAdapter: ISubtitleAPIAdapter
     {
         private const string DISPLAYNAME = "OpenSubtitles";
-        private const string USERAGENT = "TemporaryUserAgent";
+        private const string USERAGENT = "GetSubtitle";
 
-        public Task<DownloadReturn> DownloadSubtitleAsync(string Filename, string LanguageCode)
+        public Task<bool> DownloadSubtitleAsync(string filename, CultureInfo cultureInfo)
         {
+            string LanguageCode = cultureInfo.ThreeLetterISOLanguageName;
+
+            if (LanguageCode == "por")
+            {
+                LanguageCode = "pob";
+            }
+
             using (var osdb = Osdb.Create(USERAGENT))
             {
                 IList<Subtitle> subtitles = null;
 
-                subtitles = osdb.SearchSubtitlesFromFile(LanguageCode, Filename).Result;
+                subtitles = osdb.SearchSubtitlesFromFile(LanguageCode, filename).Result;
 
-                int subtitlesCount = subtitles.Count;
-                if (subtitlesCount == 0)
+                //int subtitlesCount = subtitles.Count;
+                var selectedSubtitle = subtitles.FirstOrDefault();
+
+                if ((selectedSubtitle == null) || 
+                    (selectedSubtitle.LanguageId != LanguageCode))
                 {
-                    return Task.FromResult(new DownloadReturn()
-                    {
-                        Found = false,
-                        Message = "Sorry, no subtitle found"
-                    });
+                    return Task.FromResult(false);
                 }
+                
+                string SubtitleFilename = Path.ChangeExtension(filename, "srt");
 
-                var selectedSubtitle = subtitles.First();
+                string subtitleFile = osdb.DownloadSubtitleToPath(Path.GetDirectoryName(filename), selectedSubtitle, SubtitleFilename).Result;
 
-                string SubtitleFilename = Path.ChangeExtension(Filename, "srt");
-
-                string subtitleFile = osdb.DownloadSubtitleToPath(Path.GetDirectoryName(Filename), selectedSubtitle, SubtitleFilename).Result;
-
-                return Task.FromResult(new DownloadReturn()
-                {
-                    Found = true
-                });
+                return Task.FromResult(true);
             }
         }
 

@@ -3,6 +3,7 @@ using GetSubtitle.Adapters;
 using GetSubtitle.Adapters.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -113,25 +114,21 @@ namespace GetSubtitle
         private async static Task<bool> DownloadSubtitle(List<ISubtitleAPIAdapter> adapters, string Filename,
             bool Overwrite, string LanguageCode)
         {
+            var cultureInfo = new CultureInfo(LanguageCode);
             string SubtitlePath = Path.ChangeExtension(Filename, ".srt");
 
             if ((Overwrite) || (!File.Exists(SubtitlePath)))
             {
                 foreach (var adapter in adapters)
                 {
-                    var Result = await adapter.DownloadSubtitleAsync(Filename, LanguageCode);
+                    bool Found = await adapter.DownloadSubtitleAsync(Filename, cultureInfo);
 
-                    if (Result.Found)
+                    if (Found)
                     {
                         Console.ForegroundColor = ConsoleColor.Blue;
                         Console.WriteLine($"{Path.GetFileName(Filename)}: Subtitle downloaded ({adapter.GetDisplayName()}/{LanguageCode}).");
 
                         return true;
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Result.Message);
                     }
                 }
             }

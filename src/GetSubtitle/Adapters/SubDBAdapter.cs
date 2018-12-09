@@ -1,42 +1,37 @@
 ﻿using SubDBSharp;
 using SubDBSharp.Http;
 using GetSubtitle.Adapters.Interfaces;
-using GetSubtitle.Adapters.POCO;
 using System.IO;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace GetSubtitle.Adapters
 {
     public class SubDBAdapter : ISubtitleAPIAdapter
     {
         private const string DISPLAYNAME = "SubDB";
-        private const string USERAGENT = "TemporaryUserAgent";
+        private const string USERAGENT = "GetSubtitle";
 
-        public async Task<DownloadReturn> DownloadSubtitleAsync(string Filename, string LanguageCode)
+        public Task<bool> DownloadSubtitleAsync(string filename, CultureInfo cultureInfo)
         {
+            string LanguageCode = cultureInfo.TwoLetterISOLanguageName;
+
             using (var Client = new SubDBClient(new System.Net.Http.Headers.ProductHeaderValue(USERAGENT, "1.0")))
             {
-                var Hash = Utils.GetMovieHash(Filename);
+                var Hash = Utils.GetMovieHash(filename);
 
                 Response response = Client.DownloadSubtitleAsync(Hash, LanguageCode).Result;
 
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
                 {
-                    return new DownloadReturn()
-                    {
-                        Found = false,
-                        Message = "Sorry, no subtitle found"
-                    };
+                    return Task.FromResult(false);
                 }
 
-                string path = Path.ChangeExtension(Filename, "srt");
+                string path = Path.ChangeExtension(filename, "srt");
 
                 File.WriteAllText(path, response.Body, System.Text.Encoding.UTF8);
                 
-                return new DownloadReturn()
-                {
-                    Found = true
-                };
+                return Task.FromResult(true);
             }
         }
 
