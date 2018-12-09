@@ -1,0 +1,1 @@
+dotnet publish "src\GetSubtitle\GetSubtitle.csproj" -c Release -r win-x86
