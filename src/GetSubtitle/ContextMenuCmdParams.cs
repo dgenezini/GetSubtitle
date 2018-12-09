@@ -12,10 +12,10 @@ namespace GetSubtitle
         [Option('u', "RemoveContextMenu", HelpText = "Removes context menu entries of Windows.")]
         public bool RemoveContextMenu { get; set; }
         
-        [Option('l', "LanguageCode", HelpText = "Language Code for subtitles.", Required = true)]
+        [Option('l', "LanguageCode", HelpText = "Language Code for subtitles. (en-US, pt-BR, etc)", Required = true)]
         public string LanguageCode { get; set; }
 
-        [Option('f', "FallbackLangCode", HelpText = "Fallback Language Code for subtitles.")]
+        [Option('f', "FallbackLangCode", HelpText = "Fallback Language Code for subtitles. (en-US, pt-BR, etc)")]
         public string FallbackLangCode { get; set; }
 
         [Option('v', "Verbose", HelpText = "Use detailed messages.")]
