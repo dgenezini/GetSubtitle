@@ -1,9 +1,9 @@
-﻿using SubDBSharp;
+﻿using GetSubtitle.Adapters.Interfaces;
+using SubDBSharp;
 using SubDBSharp.Http;
-using GetSubtitle.Adapters.Interfaces;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
-using System.Globalization;
 
 namespace GetSubtitle.Adapters
 {
@@ -20,18 +20,25 @@ namespace GetSubtitle.Adapters
             {
                 var Hash = Utils.GetMovieHash(filename);
 
-                Response response = Client.DownloadSubtitleAsync(Hash, LanguageCode).Result;
+                try
+                {
+                    Response response = Client.DownloadSubtitleAsync(Hash, LanguageCode).Result;
 
-                if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                    if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        return Task.FromResult(false);
+                    }
+
+                    string path = Path.ChangeExtension(filename, "srt");
+
+                    File.WriteAllText(path, response.Body, System.Text.Encoding.UTF8);
+
+                    return Task.FromResult(true);
+                }
+                catch
                 {
                     return Task.FromResult(false);
                 }
-
-                string path = Path.ChangeExtension(filename, "srt");
-
-                File.WriteAllText(path, response.Body, System.Text.Encoding.UTF8);
-                
-                return Task.FromResult(true);
             }
         }
 
