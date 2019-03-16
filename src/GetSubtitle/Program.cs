@@ -100,7 +100,6 @@ namespace GetSubtitle
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"{Path.GetFileName(options.Path)}: Subtitle not found ({options.LanguageCode}).");
-                    Console.ReadKey();
                 }
             }
             else
