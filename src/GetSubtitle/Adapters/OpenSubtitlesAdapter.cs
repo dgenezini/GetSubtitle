@@ -12,7 +12,7 @@ namespace GetSubtitle.Adapters
     public class OpenSubtitlesAdapter : ISubtitleAPIAdapter
     {
         private const string DISPLAYNAME = "OpenSubtitles";
-        private const string USERAGENT = "GetSubtitle";
+        private const string USERAGENT = "TemporaryUserAgent";
 
         public Task<bool> DownloadSubtitleAsync(string filename, CultureInfo cultureInfo)
         {
